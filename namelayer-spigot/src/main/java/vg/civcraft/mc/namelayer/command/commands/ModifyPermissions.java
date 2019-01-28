@@ -3,6 +3,7 @@ package vg.civcraft.mc.namelayer.command.commands;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -35,6 +36,10 @@ public class ModifyPermissions extends PlayerCommandMiddle{
 			return true;
 		}
 		Player p = (Player) sender;
+
+		if (rateLimit( ((OfflinePlayer) sender).getUniqueId(), "nlpm", false, 200L)) {
+			sender.sendMessage(ChatColor.RED + "Slow down!");
+		}
 		Group g = GroupManager.getGroup(args[0]);
 		if (groupIsNull(sender, args[0], g)) {
 			return true;
@@ -106,11 +111,15 @@ public class ModifyPermissions extends PlayerCommandMiddle{
 		if (!(sender instanceof Player))
 			return null;
 
-		if (args.length == 0)
-			return GroupTabCompleter.complete(null, PermissionType.getPermission("PERMS"), (Player) sender);
-		else if (args.length == 1)
-			return GroupTabCompleter.complete(args[0], PermissionType.getPermission("PERMS"), (Player)sender);
-		else if (args.length == 2) {
+		if (args.length == 0) {
+			if (!rateLimit( ((OfflinePlayer) sender).getUniqueId(), "nlpmtC", false, 500L)) {
+				return GroupTabCompleter.complete(null, PermissionType.getPermission("PERMS"), (Player) sender);
+			}
+		} else if (args.length == 1) {
+			if (!rateLimit( ((OfflinePlayer) sender).getUniqueId(), "nlpmtC", false, 500L)) {
+				return GroupTabCompleter.complete(args[0], PermissionType.getPermission("PERMS"), (Player)sender);
+			}
+		} else if (args.length == 2) {
 
 			if (args[1].length() > 0) {
 				if (args[1].charAt(0) == 'a') return java.util.Arrays.asList(new String[]{"add"});
