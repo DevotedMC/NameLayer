@@ -5,12 +5,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.ConfigurationSection;
 
 import vg.civcraft.mc.civmodcore.ACivMod;
 import vg.civcraft.mc.civmodcore.dao.ManagedDatasource;
@@ -55,7 +62,7 @@ public class NameLayerPlugin extends ACivMod{
 		instance = this;
 		mercuryEnabled = Bukkit.getPluginManager().isPluginEnabled("Mercury");
 		loadDatabases();
-	    ClassHandler.Initialize(Bukkit.getServer());
+		ClassHandler.Initialize(Bukkit.getServer());
 		new NameAPI(new GroupManager(), associations);
 		NameCleanser.load(config.getConfigurationSection("name_cleanser"));
 		registerListeners();
@@ -83,6 +90,125 @@ public class NameLayerPlugin extends ACivMod{
 			getServer().getPluginManager().registerEvents(new MercuryMessageListener(), this);
 		}
 	}
+
+
+	// Adding in rate limiting infras for use in commands.
+	private static Map<String, Long> cmdLimits = new HashMap<String, Long>();
+	private static Map<String, Long> tabLimits = new HashMap<String, Long>();
+	private static Map<String, String> cmdWarnings = new HashMap<String, String>();
+	private static Map<String, String> tabWarnings = new HashMap<String, String>();
+	private static Set<String> globalLimits = new HashSet<String>();
+	private static Map<String, Map<UUID, Long>> rateLimiter = new ConcurrentHashMap<String, Map<UUID, Long>>();
+	private static UUID GLOB = new UUID(0L, 0L);
+	public static boolean rateLimit(UUID player, String cmd, boolean tab) {
+		return rateLimit(player, cmd, true, tab);
+	}
+	public static String rateLimitMessage(String cmd, boolean tab) {
+		if (tab) {
+			return tabWarnings.get(cmd);
+		} else {
+			return cmdWarnings.get(cmd);
+		}
+	}
+	private static boolean rateLimit(UUID player, String cmd, boolean chkGlobal, boolean tab) {
+		if (tab && !tabLimits.containsKey(cmd)) return false;
+		if (!tab && !cmdLimits.containsKey(cmd)) return false;
+
+		String cmd2 = tab ? (cmd + "tb") : cmd;
+		long minDelay = tab ? tabLimits.get(cmd) : cmdLimits.get(cmd);
+		boolean ret = false;
+		if (chkGlobal && globalLimits.contains(cmd)) {
+			ret = rateLimit(GLOB, cmd2, minDelay);
+			if (ret) {
+				return ret;
+			}
+		}
+		ret = rateLimit(player, cmd2, minDelay);
+		return ret;
+	}
+
+	private static boolean rateLimit(UUID player, String cmd, long minDelay) {
+		boolean ret = false;
+		long rn = System.currentTimeMillis();
+		Map<UUID, Long> rL = rateLimiter.get(cmd);
+		if (rL == null) {
+			rL = new ConcurrentHashMap<UUID, Long>();
+			rateLimiter.put(cmd, rL);
+		}
+
+		Long ln = rL.get(player);
+		if (ln != null && ln >= (rn - minDelay)) {
+			ret = true;
+		}
+		rL.put(player, rn);
+			
+		return ret;
+	}
+
+	public void configureLimiter() {
+		// loop through each segment and look for this
+		// commandLimits:
+		//  nlpm:
+		//   useDefaults: true
+		//   minDelay: 2000
+		//   tabDelay: 1000
+		//   global: false
+		//   warning: You are using this command too often! Slow down.
+		//   tabWarning: Back off on the Tab use! Give us a chance to catch up.
+		ConfigurationSection commandLimits = config.getConfigurationSection("commandLimits");
+		if (commandLimits != null) {
+			long defaultDelay = 2000l;
+			long defaultTabDelay = 1000l;
+			String defaultWarning = "Slow down! Consider using /nl for high volume activities.";
+			String defaultTabWarning = "Please don't bash tab complete, let us catch up!";
+			if (commandLimits.contains("defaults")) {
+				ConfigurationSection commandLimit = commandLimits.getConfigurationSection("defaults");
+				if (commandLimit.contains("minDelay")) {
+					defaultDelay = commandLimit.getLong("minDelay", defaultDelay);
+				} 
+				if (commandLimit.contains("tabDelay")) {
+					defaultTabDelay = commandLimit.getLong("tabDelay", defaultTabDelay);
+				}
+				if (commandLimit.contains("warning")) {
+					defaultWarning = commandLimit.getString("warning", defaultWarning);
+				}
+				if (commandLimit.contains("tabWarning")) {
+					defaultTabWarning = commandLimit.getString("tabWarning", defaultTabWarning);
+				}
+			}
+
+			for (String cmdKey : commandLimits.getKeys(false)) {
+				if (cmdKey.equalsIgnoreCase("defaults")) continue;
+
+				ConfigurationSection commandLimit = commandLimits.getConfigurationSection(cmdKey);
+
+				if (commandLimit.contains("useDefaults") && commandLimit.getBoolean("useDefaults", false)) {
+					cmdLimits.put(cmdKey, defaultDelay);
+					tabLimits.put(cmdKey, defaultTabDelay);
+					cmdWarnings.put(cmdKey, defaultWarning);
+					tabWarnings.put(cmdKey, defaultTabWarning);
+				}
+				if (commandLimit.contains("minDelay")) {
+					cmdLimits.put(cmdKey, commandLimit.getLong("minDelay", defaultDelay));
+				} 
+				if (commandLimit.contains("tabDelay")) {
+					tabLimits.put(cmdKey, commandLimit.getLong("tabDelay", defaultTabDelay));
+				}
+				if (commandLimit.contains("global") && commandLimit.getBoolean("global", false)) {
+					globalLimits.add(cmdKey);
+				}
+				if (commandLimit.contains("warning")) {
+					cmdWarnings.put(cmdKey, commandLimit.getString("warning", defaultWarning));
+				}
+				if (commandLimit.contains("tabWarning")) {
+					tabWarnings.put(cmdKey, commandLimit.getString("tabWarning", defaultTabWarning));
+				}
+			}
+		}
+				
+
+	}
+	// configured in config.yml.
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (!loadGroups)

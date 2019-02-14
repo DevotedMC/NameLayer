@@ -14,6 +14,119 @@ groups:
   creationOnFirstJoin: true
 persistance:
   forceloadnamecaching: true
+# Command Limits let you limit how often players can use commands or tab complete, either player by player or globally across all players.
+# We've included sensible defaults with messaging to let players know why their command request was rejected.
+# NOTE: Any command not defined here will not be rate limited.
+# All limit times are in milliseconds.
+# "global" indicates that the limitations are globally applied. Defaults to "false" if not set.
+# "useDefaults" indicates that the settings in the "defaults" section should be used. Any specific values set after that are used as overrides.
+#    It is assumed to be false, unless explicitly set to true.
+#    When set to true, you can override specific limits while inheriting the defaults for everything else.
+#
+# Example commands:
+#    An example if you want only tab to be limited, do:
+#    cmd:
+#      tabDelay: 500
+#      tabWarning: Too fast, partner! Slow down with that tab non-sense.
+#    An example if you only want the command limited, and globally, but don't want tab limited:
+#
+#    cmd:
+#      global: true
+#      minDelay: 500
+#      warning: This command impacts all players, use it sparingly.
+#
+#    An example if you want to use defaults with a custom tab limit:
+#    cmd:
+#      useDefaults: true
+#      tabDelay: 100
+#      warning: Slow down on that tab-bashing, friend.
+#
+# Have fun.
+commandLimits:
+  # Use this section to override / change these plugin "background defaults" to fit your styling.
+  defaults:
+    # Please note that these defaults as demonstrated are also the "background defaults" even if this section is not defined.
+    minDelay: 2000
+    tabDelay: 1000
+    message: Slow down! Consider using /nl for high volume activities.
+    tabMessage: Please do not bash tab complete, let us catch up!
+  #nlag: # Does not have any DB impact, memory only.
+  #nlcpn: op only command
+  #nldig: op only command
+  #nlun: op only command
+  nlbl:
+    useDefaults: true
+  nlgdg:
+    useDefaults: true
+  nlcg:
+    minDelay: 1000
+    message: Slow down! Consider using /nl for high volume activities.
+  nldg:
+    useDefaults: true
+  nlgls:
+    minDelay: 5000
+    message: Be courteous in your use of this command. And patient.
+  nlgs:
+    useDefaults: true
+  nlmp:
+    useDefaults: true
+  nlid:
+    minDelay: 1000
+    message: Be courteous in your use of this command. and patient.
+  nlip:
+    useDefaults: true
+    minDelay: 1000
+  nljg:
+    minDelay: 500
+    message: Slow down!
+  nlleg:
+    useDefaults: true
+  nllink:
+    useDefaults: true
+  nllci:
+    minDelay: 500
+    message: Whoa there, what is the rush? Slow down.
+  nllg:
+    minDelay: 500
+    message: Slow down, or use the GUI interface via /nl.
+  nllm:
+    useDefaults: true
+  nllp:
+    useDefaults: true
+  nllpt:
+    minDelay: 500
+    message: Slow down, or use the GUI interface via /nl.
+  nllsg:
+    useDefaults: true
+  nlmg:
+    useDefaults: true
+  nl:
+    tabDelay: 1000
+    tabMessage: Please do not bash tab complete, let us catch up!
+  nlpp:
+    useDefaults: true
+  nlubl:
+    useDefaults: true
+  nlrm:
+    useDefaults: true
+  nlri:
+    useDefaults: true
+  nlsdg:
+    useDefaults: true
+  nlsp:
+    useDefaults: true
+    minDelay: 1000
+  nlsbl:
+    useDefaults: true
+  nltaai:
+    minDelay: 250
+    message: Slow down!
+  nltg:
+    useDefaults: true
+  nlunlink:
+    useDefaults: true
+
+    
 #name_cleanser:
 ## this section holds a list of words you consider offensive or innapropriate
 #  bad_words:

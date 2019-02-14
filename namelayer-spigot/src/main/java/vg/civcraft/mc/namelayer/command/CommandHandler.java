@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
 import vg.civcraft.mc.civmodcore.command.Command;
+import vg.civcraft.mc.namelayer.NameLayerPlugin;
 import vg.civcraft.mc.namelayer.command.commands.AcceptInvite;
 import vg.civcraft.mc.namelayer.command.commands.AddBlacklist;
 import vg.civcraft.mc.namelayer.command.commands.LinkGroups;
@@ -88,21 +90,32 @@ public class CommandHandler {
 	}
 	
 	public boolean execute(CommandSender sender, org.bukkit.command.Command cmd, String[] args){
-		if (commands.containsKey(cmd.getName().toLowerCase())){
-			Command command = commands.get(cmd.getName().toLowerCase());
+		String cmdName = cmd.getName().toLowerCase();
+		if (commands.containsKey(cmdName)){
+			Command command = commands.get(cmdName);
 			if (args.length < command.getMinArguments() || args.length > command.getMaxArguments()){
 				helpPlayer(command, sender);
 				return true;
 			}
-			command.execute(sender, args);
+			if (!NameLayerPlugin.rateLimit(((OfflinePlayer) sender).getUniqueId(), cmdName, false)) {
+				command.execute(sender, args);
+			} else {
+				limitPlayer(cmdName, sender, false);
+			}
 		}
 		return true;
 	}
 
 	public List<String> complete(CommandSender sender, org.bukkit.command.Command cmd, String[] args){
-		if (commands.containsKey(cmd.getName().toLowerCase())){
-			Command command = commands.get(cmd.getName().toLowerCase());
-			return command.tabComplete(sender, args);
+		String cmdName = cmd.getName().toLowerCase();
+		if (commands.containsKey(cmdName)){
+			Command command = commands.get(cmdName);
+			if (!NameLayerPlugin.rateLimit(((OfflinePlayer) sender).getUniqueId(), cmdName, true)) {
+				return command.tabComplete(sender, args);
+			} else {
+				limitPlayer(cmdName, sender, true);
+				return null;
+			}
 		}
 		return null;
 	}
@@ -112,5 +125,12 @@ public class CommandHandler {
 		sender.sendMessage(new StringBuilder().append(ChatColor.RED + "Command: " ).append(command.getName()).toString());
 		sender.sendMessage(new StringBuilder().append(ChatColor.RED + "Description: " ).append(command.getDescription()).toString());
 		sender.sendMessage(new StringBuilder().append(ChatColor.RED + "Usage: ").append(command.getUsage()).toString());
+	}
+
+	public void limitPlayer(String cmd, CommandSender sender, boolean isTab) {
+		String limitMsg = NameLayerPlugin.rateLimitMessage(cmd, isTab);
+		if (limitMsg != null && !"".equals(limitMsg.trim())) {
+			sender.sendMessage(new StringBuilder().append(ChatColor.RED).append(limitMsg).toString());
+		}
 	}
 }
