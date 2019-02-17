@@ -65,6 +65,7 @@ public class NameLayerPlugin extends ACivMod{
 		ClassHandler.Initialize(Bukkit.getServer());
 		new NameAPI(new GroupManager(), associations);
 		NameCleanser.load(config.getConfigurationSection("name_cleanser"));
+		configureLimiter();
 		registerListeners();
 		if (loadGroups){
 			PermissionType.initialize();
