@@ -89,7 +89,7 @@ public class AdminFunctionsGUI extends AbstractGroupGUI {
 					if (!MenuUtils.guiRateLimit(p, "nltg", false)) {
 						showTransferingMenu();
 					} else {
-						MenuUtils.getLimitPlayer(p, "nltg", false);	
+						MenuUtils.guiLimitPlayer(p, "nltg", false);	
 					}
 				}
 			};
@@ -111,7 +111,7 @@ public class AdminFunctionsGUI extends AbstractGroupGUI {
 					if (!MenuUtils.guiRateLimit(p, "nltg", false)) {
 						showDeletionMenu();
 					} else {
-						MenuUtils.getLimitPlayer(p, "nltg", false);	
+						MenuUtils.guiLimitPlayer(p, "nltg", false);	
 					}
 				}
 			};

@@ -8,6 +8,8 @@ import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 
 import vg.civcraft.mc.civmodcore.itemHandling.ISUtils;
 import vg.civcraft.mc.namelayer.NameLayerPlugin;

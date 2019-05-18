@@ -114,11 +114,9 @@ public class InvitationGUI extends AbstractGroupGUI{
 								return null;
 							}
 							List <String> names;
-							else {
-								names = new LinkedList<String>();
-								for(Player p : Bukkit.getOnlinePlayers()) {
-									names.add(p.getName());
-								}
+							names = new LinkedList<String>();
+							for(Player p : Bukkit.getOnlinePlayers()) {
+								names.add(p.getName());
 							}
 							names.add("cancel");
 							if (word.equals("")) {
