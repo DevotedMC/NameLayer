@@ -22,6 +22,7 @@ import vg.civcraft.mc.namelayer.GroupManager.PlayerType;
 import vg.civcraft.mc.namelayer.group.Group;
 import vg.civcraft.mc.namelayer.permission.GroupPermission;
 import vg.civcraft.mc.namelayer.permission.PermissionType;
+import vg.civcraft.mc.namelayer.gui.MenuUtils;
 
 public class PermissionManageGUI extends AbstractGroupGUI {
 
@@ -146,6 +147,11 @@ public class PermissionManageGUI extends AbstractGroupGUI {
 
 					@Override
 					public void clicked(Player arg0) {
+						if (MenuUtils.guiRateLimit(arg0, "nlmp", false)) {
+							MenuUtils.guiLimitPlayer(arg0, "nlmp", false);
+							showPermissionEditing(pType);
+							return;
+						}
 						if (hasPerm == gp.hasPermission(pType, perm)) { // recheck
 							if (gm.hasAccess(g, p.getUniqueId(),
 									PermissionType.getPermission("PERMS"))) {

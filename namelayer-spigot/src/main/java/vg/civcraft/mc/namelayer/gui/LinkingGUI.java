@@ -16,6 +16,7 @@ import vg.civcraft.mc.civmodcore.itemHandling.ISUtils;
 import vg.civcraft.mc.namelayer.NameLayerPlugin;
 import vg.civcraft.mc.namelayer.group.Group;
 import vg.civcraft.mc.namelayer.permission.PermissionType;
+import vg.civcraft.mc.namelayer.gui.MenuUtils;
 
 public class LinkingGUI extends AbstractGroupGUI {
 
@@ -104,6 +105,10 @@ public class LinkingGUI extends AbstractGroupGUI {
 
 				@Override
 				public void clicked(Player arg0) {
+					if (MenuUtils.guiRateLimit(arg0, "nlunlink", false)) {
+						MenuUtils.guiLimitPlayer(arg0, "nlunlink", false);
+						return;
+					}
 					if (!gm.hasAccess(g, p.getUniqueId(),
 							PermissionType.getPermission("LINKING"))) {
 						p.sendMessage(ChatColor.RED
@@ -185,6 +190,10 @@ public class LinkingGUI extends AbstractGroupGUI {
 
 			@Override
 			public void clicked(Player arg0) {
+				if (MenuUtils.guiRateLimit(arg0, "nlunlink", false)) {
+					MenuUtils.guiLimitPlayer(arg0, "nlunlink", false);
+					return;
+				}
 				if (!gm.hasAccess(g, p.getUniqueId(),
 						PermissionType.getPermission("LINKING"))) {
 					p.sendMessage(ChatColor.RED
@@ -331,6 +340,11 @@ public class LinkingGUI extends AbstractGroupGUI {
 	}
 
 	private void requestLink(String groupName) {
+		if (MenuUtils.guiRateLimit(p, "nllink", false)) {
+			MenuUtils.guiLimitPlayer(p, "nllink", false);
+			showScreen();
+			return;
+		}
 		Group linkGroup = gm.getGroup(groupName);
 		if (linkGroup == null) {
 			p.sendMessage(ChatColor.RED

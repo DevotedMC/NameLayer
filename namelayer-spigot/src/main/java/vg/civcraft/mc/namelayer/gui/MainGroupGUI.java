@@ -25,7 +25,6 @@ import vg.civcraft.mc.civmodcore.inventorygui.Clickable;
 import vg.civcraft.mc.civmodcore.inventorygui.ClickableInventory;
 import vg.civcraft.mc.civmodcore.inventorygui.DecorationStack;
 import vg.civcraft.mc.civmodcore.itemHandling.ISUtils;
-import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.namelayer.GroupManager.PlayerType;
 import vg.civcraft.mc.namelayer.NameAPI;
 import vg.civcraft.mc.namelayer.NameLayerPlugin;
@@ -33,8 +32,8 @@ import vg.civcraft.mc.namelayer.events.PromotePlayerEvent;
 import vg.civcraft.mc.namelayer.group.BlackList;
 import vg.civcraft.mc.namelayer.group.Group;
 import vg.civcraft.mc.namelayer.listeners.PlayerListener;
-import vg.civcraft.mc.namelayer.misc.Mercury;
 import vg.civcraft.mc.namelayer.permission.PermissionType;
+import vg.civcraft.mc.namelayer.gui.MenuUtils;
 
 public class MainGroupGUI extends AbstractGroupGUI {
 
@@ -195,6 +194,11 @@ public class MainGroupGUI extends AbstractGroupGUI {
 
 						@Override
 						public void clicked(Player arg0) {
+							if (MenuUtils.guiRateLimit(arg0, "nlubl", false)) {
+								MenuUtils.guiLimitPlayer(arg0, "nlubl", false);
+								showScreen();
+								return;
+							}
 							if (gm.hasAccess(g, p.getUniqueId(),
 									PermissionType.getPermission("BLACKLIST"))) {
 								NameLayerPlugin.log(
@@ -277,6 +281,11 @@ public class MainGroupGUI extends AbstractGroupGUI {
 
 						@Override
 						public void clicked(Player arg0) {
+							if (MenuUtils.guiRateLimit(arg0, "nlri", false)) {
+								MenuUtils.guiLimitPlayer(arg0, "nlri", false);
+								showScreen();
+								return;
+							}
 							UUID invitedUUID = NameAPI.getUUID(playerName);
 							PlayerType pType = g.getInvite(invitedUUID);
 							if (pType == null) {
@@ -285,6 +294,7 @@ public class MainGroupGUI extends AbstractGroupGUI {
 										+ playerName
 										+ ". This player isn't invited currently.");
 								showScreen();
+								return;
 							}
 							// make sure the player still has permission to do
 							// this
@@ -319,7 +329,6 @@ public class MainGroupGUI extends AbstractGroupGUI {
 										+ " for group " + g.getName() + "via gui");
 								g.removeInvite(invitedUUID, true);
 								PlayerListener.removeNotification(invitedUUID, g);
-								Mercury.remInvite(g.getGroupId(), invitedUUID);
 
 								p.sendMessage(ChatColor.GREEN + playerName
 										+ "'s invitation has been revoked.");
@@ -530,6 +539,11 @@ public class MainGroupGUI extends AbstractGroupGUI {
 
 					@Override
 					public void clicked(Player arg0) {
+						if (MenuUtils.guiRateLimit(arg0, "nlrm", false)) {
+							MenuUtils.guiLimitPlayer(arg0, "nlrm", false);
+							showScreen();
+							return;
+						}
 						if (gm.hasAccess(g, p.getUniqueId(),
 								getAccordingPermission(g
 										.getCurrentRank(toChange)))) {
@@ -555,6 +569,11 @@ public class MainGroupGUI extends AbstractGroupGUI {
 
 					@Override
 					public void clicked(Player arg0) {
+						if (MenuUtils.guiRateLimit(arg0, "nlpp", false)) {
+							MenuUtils.guiLimitPlayer(arg0, "nlpp", false);
+							showDetail(toChange);
+							return;
+						}
 						changePlayerRank(toChange, pType);
 						showDetail(toChange);
 					}
@@ -731,6 +750,11 @@ public class MainGroupGUI extends AbstractGroupGUI {
 
 				@Override
 				public void clicked(final Player p) {
+					if (MenuUtils.guiRateLimit(p, "nlbl", false)) {
+						MenuUtils.guiLimitPlayer(p, "nlbl", false);
+						showScreen();
+						return;
+					}
 					p.sendMessage(ChatColor.GOLD + "Enter the name of the player to blacklist or \"cancel\" to exit this prompt");
 					ClickableInventory.forceCloseInventory(p);
 					Dialog dia = new Dialog(p, NameLayerPlugin.getInstance()) {
@@ -738,15 +762,14 @@ public class MainGroupGUI extends AbstractGroupGUI {
 						@Override
 						public List<String> onTabComplete(String word,
 								String[] msg) {
+							if (MenuUtils.guiRateLimit(p, "nlbl", true)) {
+								MenuUtils.guiLimitPlayer(p, "nlbl", true);
+								return null;
+							}
 							List<String> names;
-							if (NameLayerPlugin.isMercuryEnabled()) {
-								names = new LinkedList<String>(
-										MercuryAPI.getAllPlayers());
-							} else {
-								names = new LinkedList<String>();
-								for (Player p : Bukkit.getOnlinePlayers()) {
-									names.add(p.getName());
-								}
+							names = new LinkedList<String>();
+							for (Player p : Bukkit.getOnlinePlayers()) {
+								names.add(p.getName());
 							}
 							if (word.equals("")) {
 								return names;
@@ -845,6 +868,11 @@ public class MainGroupGUI extends AbstractGroupGUI {
 
 				@Override
 				public void clicked(final Player p) {
+					if (MenuUtils.guiRateLimit(p, "nlsp", false)) {
+						MenuUtils.guiLimitPlayer(p, "nlsp", false);
+						showScreen();
+						return;
+					}
 					if (gm.hasAccess(g, p.getUniqueId(),
 							PermissionType.getPermission("PASSWORD"))) {
 						p.sendMessage(ChatColor.GOLD
@@ -969,6 +997,11 @@ public class MainGroupGUI extends AbstractGroupGUI {
 
 				@Override
 				public void clicked(Player p) {
+					if (MenuUtils.guiRateLimit(p, "nlsdg", false)) {
+						MenuUtils.guiLimitPlayer(p, "nlsdg", false);
+						showScreen();
+						return;
+					}
 					NameLayerPlugin.log(Level.INFO, p.getName()
 							+ " set default group to " + g.getName()
 							+ "via gui");
@@ -1021,6 +1054,11 @@ public class MainGroupGUI extends AbstractGroupGUI {
 
 				@Override
 				public void clicked(Player p) {
+					if (MenuUtils.guiRateLimit(p, "nlleg", false)) {
+						MenuUtils.guiLimitPlayer(p, "nlleg", false);
+						showScreen();
+						return;
+					}
 					ClickableInventory confirmInv = new ClickableInventory(27,
 							g.getName());
 					ItemStack info = new ItemStack(Material.PAPER);

@@ -17,6 +17,7 @@ import vg.civcraft.mc.namelayer.NameLayerPlugin;
 import vg.civcraft.mc.namelayer.command.commands.MergeGroups;
 import vg.civcraft.mc.namelayer.group.Group;
 import vg.civcraft.mc.namelayer.permission.PermissionType;
+import vg.civcraft.mc.namelayer.gui.MenuUtils;
 
 public class MergeGUI extends AbstractGroupGUI {
 
@@ -156,6 +157,11 @@ public class MergeGUI extends AbstractGroupGUI {
 	}
 
 	private void requestConfirmation(final String groupName) {
+		if (MenuUtils.guiRateLimit(p, "nlmg", false)) {
+			MenuUtils.guiLimitPlayer(p, "nlmg", false);
+			showScreen();
+			return;
+		}
 		ClickableInventory confirmInv = new ClickableInventory(27, g.getName());
 		String fromGroup = mergeIntoThisGroup ? groupName : g.getName();
 		String targetGroup = mergeIntoThisGroup ? g.getName() : groupName;

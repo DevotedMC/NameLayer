@@ -18,14 +18,13 @@ import vg.civcraft.mc.civmodcore.inventorygui.Clickable;
 import vg.civcraft.mc.civmodcore.inventorygui.ClickableInventory;
 import vg.civcraft.mc.civmodcore.inventorygui.DecorationStack;
 import vg.civcraft.mc.civmodcore.itemHandling.ISUtils;
-import vg.civcraft.mc.mercury.MercuryAPI;
 import vg.civcraft.mc.namelayer.NameAPI;
 import vg.civcraft.mc.namelayer.NameLayerPlugin;
 import vg.civcraft.mc.namelayer.GroupManager.PlayerType;
 import vg.civcraft.mc.namelayer.command.commands.InvitePlayer;
 import vg.civcraft.mc.namelayer.group.Group;
-import vg.civcraft.mc.namelayer.misc.Mercury;
 import vg.civcraft.mc.namelayer.permission.PermissionType;
+import vg.civcraft.mc.namelayer.gui.MenuUtils;
 
 public class InvitationGUI extends AbstractGroupGUI{
 	
@@ -64,6 +63,10 @@ public class InvitationGUI extends AbstractGroupGUI{
 				
 				@Override
 				public void clicked(Player arg0) {
+					if (MenuUtils.guiRateLimit(arg0, "nlip", false)) {
+						MenuUtils.guiLimitPlayer(arg0, "nlip", false);
+						return;
+					}
 					p.sendMessage(ChatColor.GOLD + "Enter the name of the player to invite or \"cancel\" to exit this prompt. You may also enter the names"
 							+ "of multiple players, separated with spaces to invite all of them");
 					selectedType = pType;
@@ -96,8 +99,6 @@ public class InvitationGUI extends AbstractGroupGUI{
 													+ "via gui");
 									InvitePlayer.sendInvitation(g, pType, inviteUUID, p.getUniqueId(), true);
 									
-									Mercury.addInvite(g.getGroupId(), pType.toString(), inviteUUID, p.getUniqueId().toString());
-
 									p.sendMessage(ChatColor.GREEN  + "Invited " + NameAPI.getCurrentName(inviteUUID) + " as " + PlayerType.getNiceRankName(pType));
 								}
 							}
@@ -108,10 +109,11 @@ public class InvitationGUI extends AbstractGroupGUI{
 						}
 						
 						public List <String> onTabComplete(String word, String [] msg) {
-							List <String> names;
-							if (NameLayerPlugin.isMercuryEnabled()) {
-								names = new LinkedList<String>(MercuryAPI.getAllPlayers());
+							if (MenuUtils.guiRateLimit(arg0, "nlip", true)) {
+								MenuUtils.guiLimitPlayer(arg0, "nlip", true);
+								return null;
 							}
+							List <String> names;
 							else {
 								names = new LinkedList<String>();
 								for(Player p : Bukkit.getOnlinePlayers()) {

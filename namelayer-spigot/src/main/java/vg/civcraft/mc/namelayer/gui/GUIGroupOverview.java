@@ -32,6 +32,7 @@ import vg.civcraft.mc.namelayer.GroupManager.PlayerType;
 import vg.civcraft.mc.namelayer.group.Group;
 import vg.civcraft.mc.namelayer.permission.GroupPermission;
 import vg.civcraft.mc.namelayer.permission.PermissionType;
+import vg.civcraft.mc.namelayer.gui.MenuUtils;
 
 public class GUIGroupOverview {
 
@@ -76,6 +77,11 @@ public class GUIGroupOverview {
 			
 			@Override
 			public void clicked(Player p) {
+				if (MenuUtils.guiRateLimit(p, "nltaai", false)) {
+					MenuUtils.guiLimitPlayer(p, "nltaai", false);
+					showScreen();
+					return;
+				}
 				if (autoAccept){
 					NameLayerPlugin.log(Level.INFO,
 							p.getName() + " turned autoaccept for invites off "
@@ -233,6 +239,10 @@ public class GUIGroupOverview {
 
 			@Override
 			public void clicked(final Player p) {
+				if (MenuUtils.guiRateLimit(p, "nlcg", false)) {
+					MenuUtils.guiLimitPlayer(p, "nlcg", false);
+					return;
+				}
 				p.sendMessage(ChatColor.YELLOW
 						+ "Enter the name of your new group or \"cancel\" to exit this prompt");
 				ClickableInventory.forceCloseInventory(p);
@@ -347,6 +357,10 @@ public class GUIGroupOverview {
 			
 			@Override
 			public void clicked(final Player p) {
+				if (MenuUtils.guiRateLimit(p, "nljg", false)) {
+					MenuUtils.guiLimitPlayer(p, "nljg", false);
+					return;
+				}
 				p.sendMessage(ChatColor.YELLOW + "Enter the name of the group or \"cancel\" to leave this prompt");
 				ClickableInventory.forceCloseInventory(p);
 				Dialog dia = new Dialog(p, NameLayerPlugin.getInstance()) {

@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import vg.civcraft.mc.civmodcore.itemHandling.ISUtils;
+import vg.civcraft.mc.namelayer.NameLayerPlugin;
 
 public class MenuUtils {
 	public static ItemStack toggleButton(boolean initState, String name, boolean canModify) {
@@ -69,5 +70,16 @@ public class MenuUtils {
 			}
 		}
 		return splitLore;
+	}
+
+	public static boolean guiRateLimit(Player p, String cmd, boolean isTab) {	
+		return NameLayerPlugin.rateLimit(((OfflinePlayer) p).getUniqueId(), cmd, isTab);
+	}
+
+	public static void guiLimitPlayer(Player p, String cmd, boolean isTab) {
+		String limitMsg = NameLayerPlugin.rateLimitMessage(cmd, isTab);
+		if (limitMsg != null && !"".equals(limitMsg.trim())) {
+			p.sendMessage(new StringBuilder().append(ChatColor.RED).append(limitMsg).toString());
+		}
 	}
 }
